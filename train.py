@@ -31,8 +31,8 @@ TRAINING_IMAGES_DIR = os.getcwd() + "/train/"
 TEST_IMAGES_DIR = os.getcwd() + "/test/"
 #count = 0
 
-img_rows = 28
-img_cols = 28
+img_rows = 32
+img_cols = 32
 
 for l in os.listdir(TRAINING_IMAGES_DIR):
     print(l)
@@ -40,12 +40,12 @@ for l in os.listdir(TRAINING_IMAGES_DIR):
     TRAINING_IMAGES_SUB_DIR = TRAINING_IMAGES_DIR+l
     for train_image in os.listdir(TRAINING_IMAGES_SUB_DIR):
         
-        image_size=28
+        image_size=32
         filename = os.path.join(TRAINING_IMAGES_SUB_DIR,train_image)
         image = cv2.imread(filename) # read image using OpenCV
         print(filename)
         # Resize image to desired size and preprocess exactly as done during training...
-        image = cv2.resize(image, (image_size, image_size),0,0, cv2.INTER_LINEAR)
+        image = cv2.resize(image, (img_rows, img_cols),0,0, cv2.INTER_LINEAR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         train_images.append(image)
         train_labels.append(num_classes)
@@ -61,12 +61,12 @@ for test_image in os.listdir(TEST_IMAGES_DIR):
          
      filename = os.path.join(TEST_IMAGES_DIR,test_image)
  
-     image_size=28
+     image_size=32
      num_channels=10 # 10 digits 0 to 10
      image = cv2.imread(filename) # read image using OpenCV
      
      # Resize image to desired size and preprocess exactly as done during training...
-     image = cv2.resize(image, (image_size, image_size),0,0, cv2.INTER_LINEAR)
+     image = cv2.resize(image, (img_rows, img_cols),0,0, cv2.INTER_LINEAR)
      image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
      test_images.append(image)
      test_labels.append(0)
@@ -106,24 +106,11 @@ print('x_test shape:', x_test.shape)
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
-#keras.layers.Conv2D(filters, kernel_size, strides=(1, 1), padding='valid', data_format=None, dilation_rate=(1, 1), activation=None, use_bias=True, kernel_initializer='glorot_uniform', bias_initializer='zeros', kernel_regularizer=None, bias_regularizer=None, activity_regularizer=None, kernel_constraint=None, bias_constraint=None)
-
-#Convolution2D(number_filter,row_size, column_size, input_shape=(number_channel, img_row, ima_col))
-
-
-#model = keras.Sequential([
-#    keras.layers.Flatten(input_shape=(28, 28, 1)),
-#    keras.layers.Dense(512, activation=tf.nn.relu),
-#    keras.layers.Dropout(0.2),
-#    keras.layers.Dense(2, activation=tf.nn.softmax)
-#])
-
 model = Sequential()
-
 model.add(Conv2D(6, kernel_size=(3, 3),
                  activation='relu',
                  input_shape=input_shape))
-model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Conv2D(128, (3, 3), activation='relu'))
 model.add(Dropout(0.25))
@@ -137,7 +124,7 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-#model.fit(x_train, y_train, epochs=200)
+#model.load_weights('my_model')
 
 model.fit(x_train, y_train,
           batch_size=batch_size,
@@ -147,7 +134,7 @@ model.fit(x_train, y_train,
 
 model.save_weights('./my_model')
 
-#model.load_weights('my_model')
+
 
 test_loss, test_acc = model.evaluate(x_test, y_test)
 
